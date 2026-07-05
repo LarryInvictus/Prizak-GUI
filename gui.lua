@@ -1,4 +1,4 @@
---// PRIZAK GUI — Revamped Full System (SAFE)
+--// PRIZAK GUI — Revamped Full System (SAFE & FIXED)
 --// Fade + Toggle + Slide Panel + Commands + Tabs + Inputs
 
 local Players = game:GetService("Players")
@@ -102,10 +102,16 @@ panel.Position = UDim2.new(0.5,-225,1,0)
 panel.BackgroundColor3 = Color3.fromRGB(40,40,40)
 panel.Parent = mainGui
 
+local panelCorner = Instance.new("UICorner", panel)
+panelCorner.CornerRadius = UDim.new(0,10)
+
 local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1,0,0,40)
 topBar.BackgroundColor3 = Color3.fromRGB(70,70,70)
 topBar.Parent = panel
+
+local topBarCorner = Instance.new("UICorner", topBar)
+topBarCorner.CornerRadius = UDim.new(0,10)
 
 local strip = Instance.new("Frame")
 strip.Size = UDim2.new(1,0,0,6)
@@ -121,6 +127,9 @@ closeBtn.TextScaled = true
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 closeBtn.Parent = topBar
+
+local closeBtnCorner = Instance.new("UICorner", closeBtn)
+closeBtnCorner.CornerRadius = UDim.new(0,5)
 
 makeDraggable(topBar)
 
@@ -194,8 +203,10 @@ local function ExecuteCommand(text)
 
 	local cmd = Commands[cmdName]
 	if cmd then
-		cmd.run(args)
-		ShowPopup()
+		pcall(function()
+			cmd.run(args)
+			ShowPopup()
+		end)
 	else
 		warn("Unknown command:", cmdName)
 	end
@@ -226,6 +237,9 @@ tab1.Font = Enum.Font.GothamBold
 tab1.TextColor3 = Color3.fromRGB(255,255,255)
 tab1.Parent = tabBar
 
+local tab1Corner = Instance.new("UICorner", tab1)
+tab1Corner.CornerRadius = UDim.new(0,5)
+
 local tab2 = Instance.new("TextButton")
 tab2.Size = UDim2.new(0.5,0,1,0)
 tab2.Position = UDim2.new(0.5,0,0,0)
@@ -235,6 +249,9 @@ tab2.TextScaled = true
 tab2.Font = Enum.Font.GothamBold
 tab2.TextColor3 = Color3.fromRGB(255,255,255)
 tab2.Parent = tabBar
+
+local tab2Corner = Instance.new("UICorner", tab2)
+tab2Corner.CornerRadius = UDim.new(0,5)
 
 ---------------------------------------------------------------------
 -- 6. TAB CONTENTS
@@ -277,6 +294,9 @@ input.TextScaled = true
 input.PlaceholderText = "Enter command..."
 input.Parent = consolePage
 
+local inputCorner = Instance.new("UICorner", input)
+inputCorner.CornerRadius = UDim.new(0,5)
+
 local runBtn = Instance.new("TextButton")
 runBtn.Size = UDim2.new(1,-20,0,40)
 runBtn.Position = UDim2.new(0,10,0,60)
@@ -286,6 +306,9 @@ runBtn.TextScaled = true
 runBtn.Font = Enum.Font.GothamBold
 runBtn.TextColor3 = Color3.fromRGB(255,255,255)
 runBtn.Parent = consolePage
+
+local runBtnCorner = Instance.new("UICorner", runBtn)
+runBtnCorner.CornerRadius = UDim.new(0,5)
 
 runBtn.MouseButton1Click:Connect(function()
 	if input.Text ~= "" then
@@ -329,11 +352,14 @@ local function AddCommandButton(name, cmdData)
 	btn.TextColor3 = Color3.fromRGB(255,255,255)
 	btn.Parent = cmdsList
 
+	local btnCorner = Instance.new("UICorner", btn)
+	btnCorner.CornerRadius = UDim.new(0,5)
+
 	if cmdData.input then
 		btn.MouseButton1Click:Connect(function()
 			local prompt = Instance.new("TextBox")
-			prompt.Size = UDim2.new(1,0,0,40)
-			prompt.Position = UDim2.new(0,0,0,50)
+			prompt.Size = UDim2.new(1,-20,0,40)
+			prompt.Position = UDim2.new(0,10,0,50)
 			prompt.BackgroundColor3 = Color3.fromRGB(60,60,60)
 			prompt.TextColor3 = Color3.fromRGB(255,255,255)
 			prompt.Font = Enum.Font.Gotham
@@ -341,9 +367,12 @@ local function AddCommandButton(name, cmdData)
 			prompt.PlaceholderText = "Enter input..."
 			prompt.Parent = cmdsPage
 
+			local promptCorner = Instance.new("UICorner", prompt)
+			promptCorner.CornerRadius = UDim.new(0,5)
+
 			local ok = Instance.new("TextButton")
-			ok.Size = UDim2.new(1,0,0,40)
-			ok.Position = UDim2.new(0,0,0,100)
+			ok.Size = UDim2.new(1,-20,0,40)
+			ok.Position = UDim2.new(0,10,0,100)
 			ok.BackgroundColor3 = Color3.fromRGB(90,90,90)
 			ok.Text = "Run"
 			ok.TextScaled = true
@@ -351,15 +380,24 @@ local function AddCommandButton(name, cmdData)
 			ok.TextColor3 = Color3.fromRGB(255,255,255)
 			ok.Parent = cmdsPage
 
+			local okCorner = Instance.new("UICorner", ok)
+			okCorner.CornerRadius = UDim.new(0,5)
+
 			ok.MouseButton1Click:Connect(function()
-				cmdData.run({prompt.Text})
+				pcall(function()
+					cmdData.run({prompt.Text})
+					ShowPopup()
+				end)
 				prompt:Destroy()
 				ok:Destroy()
 			end)
 		end)
 	else
 		btn.MouseButton1Click:Connect(function()
-			cmdData.run({})
+			pcall(function()
+				cmdData.run({})
+				ShowPopup()
+			end)
 		end)
 	end
 end
@@ -452,12 +490,14 @@ RegisterCommand("clip", function()
 		noclipConn:Disconnect()
 		noclipConn = nil
 	end
-	for _,v in pairs(Player.Character:GetDescendants()) do
-		if v:IsA("BasePart") then
-			v.CanCollide = true
+	if Player.Character then
+		for _,v in pairs(Player.Character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide = true
+			end
 		end
 	end
-end, "Recip", false)
+end, "Clip", false)
 
 -- SPEED
 RegisterCommand("speed", function(args)
