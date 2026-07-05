@@ -128,7 +128,9 @@ local openTween = TweenService:Create(panel, TweenInfo.new(0.5, Enum.EasingStyle
 	Position = UDim2.new(0.5,-225,0.5,-175)
 })
 
-local closeTween = TweenService:Create(panel, TweenInfo.new(0.5,-225,1,0))
+local closeTween = TweenService:Create(panel, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {
+	Position = UDim2.new(0.5,-225,1,0)
+})
 
 toggleBtn.MouseButton1Click:Connect(function()
 	openTween:Play()
@@ -288,6 +290,7 @@ runBtn.Parent = consolePage
 runBtn.MouseButton1Click:Connect(function()
 	if input.Text ~= "" then
 		ExecuteCommand(input.Text)
+		input.Text = ""
 	end
 end)
 
