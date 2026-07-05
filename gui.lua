@@ -10,6 +10,34 @@ local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 
 ---------------------------------------------------------------------
+-- HELPER: Find player by display name or username
+---------------------------------------------------------------------
+
+local function FindPlayer(input)
+	if not input or input == "" then return nil end
+	
+	-- First try exact username match
+	local target = Players:FindFirstChild(input)
+	if target then return target end
+	
+	-- Then try display name match (case-insensitive)
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.DisplayName:lower() == input:lower() then
+			return player
+		end
+	end
+	
+	-- Finally try partial username match
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Name:lower():find(input:lower(), 1, true) then
+			return player
+		end
+	end
+	
+	return nil
+end
+
+---------------------------------------------------------------------
 -- 1. FADE-IN SCREEN
 ---------------------------------------------------------------------
 
@@ -406,11 +434,6 @@ end
 -- 9. SAFE COMMANDS (NO EXPLOITS)
 ---------------------------------------------------------------------
 
--- HELLO
-RegisterCommand("hello", function(args)
-	print("Hello command executed!", args)
-end, "Test command", false)
-
 -- PREFIX
 RegisterCommand("prefix", function(args)
 	if args[1] then
@@ -522,18 +545,18 @@ RegisterCommand("reset", function()
 	end
 end, "Reset character", false)
 
--- TP
-RegisterCommand("tp", function(args)
-	local target = Players:FindFirstChild(args[1])
+-- GOTO (Teleport to player - uses display name or username)
+RegisterCommand("goto", function(args)
+	local target = FindPlayer(args[1])
 	if target and target.Character and Player.Character then
 		Player.Character:WaitForChild("HumanoidRootPart").CFrame =
 			target.Character:WaitForChild("HumanoidRootPart").CFrame
 	end
-end, "Teleport to player", true)
+end, "Goto player (display name or username)", true)
 
--- FLING (client fling)
+-- FLING (client fling - uses display name or username)
 RegisterCommand("fling", function(args)
-	local target = Players:FindFirstChild(args[1])
+	local target = FindPlayer(args[1])
 	if not target or not target.Character or not Player.Character then return end
 
 	local hrp = Player.Character:WaitForChild("HumanoidRootPart")
@@ -541,7 +564,7 @@ RegisterCommand("fling", function(args)
 
 	hrp.CFrame = thrp.CFrame
 	hrp.AssemblyLinearVelocity = Vector3.new(9999,9999,9999)
-end, "Fling player", true)
+end, "Fling player (display name or username)", true)
 
 -- EXTRA SMALL SAFE COMMANDS
 RegisterCommand("defaults", function()
