@@ -1,4 +1,4 @@
---// PRIZAK GUI — Revamped Full System (SAFE & FIXED)
+--// PRIZAK GUI — Revamped Full System (SAFE & FIXED) + ENHANCED STYLING
 --// Fade + Toggle + Slide Panel + Commands + Tabs + Inputs
 
 local Players = game:GetService("Players")
@@ -8,6 +8,22 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
+
+---------------------------------------------------------------------
+-- COLOR SCHEME
+---------------------------------------------------------------------
+
+local Colors = {
+	Primary = Color3.fromRGB(138, 43, 226),      -- Vibrant Purple
+	PrimaryLight = Color3.fromRGB(186, 85, 211), -- Medium Orchid
+	Secondary = Color3.fromRGB(0, 191, 255),     -- Deep Sky Blue
+	Accent = Color3.fromRGB(255, 69, 0),         -- Red-Orange
+	Dark = Color3.fromRGB(20, 20, 30),           -- Dark BG
+	DarkAlt = Color3.fromRGB(30, 30, 45),        -- Slightly Lighter
+	Text = Color3.fromRGB(255, 255, 255),        -- White
+	Success = Color3.fromRGB(50, 205, 50),       -- Lime Green
+	Warning = Color3.fromRGB(255, 215, 0)        -- Gold
+}
 
 ---------------------------------------------------------------------
 -- HELPER: Find player by display name or username
@@ -47,17 +63,21 @@ fadeGui.Parent = PlayerGui
 
 local fadeFrame = Instance.new("Frame")
 fadeFrame.Size = UDim2.fromScale(1,1)
-fadeFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+fadeFrame.BackgroundColor3 = Colors.Dark
 fadeFrame.Parent = fadeGui
 
 local fadeText = Instance.new("TextLabel")
 fadeText.Size = UDim2.fromScale(1,1)
 fadeText.BackgroundTransparency = 1
-fadeText.Text = "Prizak GUI"
-fadeText.TextColor3 = Color3.fromRGB(255,255,255)
+fadeText.Text = "⚡ PRIZAK GUI ⚡"
+fadeText.TextColor3 = Colors.Primary
 fadeText.Font = Enum.Font.GothamBold
 fadeText.TextScaled = true
 fadeText.Parent = fadeGui
+
+local fadeShadow = Instance.new("UIStroke", fadeText)
+fadeShadow.Color = Colors.Secondary
+fadeShadow.Thickness = 2
 
 fadeText.TextTransparency = 1
 TweenService:Create(fadeText, TweenInfo.new(1), {TextTransparency = 0}):Play()
@@ -78,15 +98,19 @@ mainGui.Parent = PlayerGui
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Size = UDim2.fromOffset(110,110)
 toggleBtn.Position = UDim2.fromScale(0.1,0.4)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+toggleBtn.BackgroundColor3 = Colors.Primary
 toggleBtn.Text = "🔥"
 toggleBtn.TextScaled = true
 toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+toggleBtn.TextColor3 = Colors.Text
 toggleBtn.Parent = mainGui
 
 local toggleCorner = Instance.new("UICorner", toggleBtn)
 toggleCorner.CornerRadius = UDim.new(1,0)
+
+local toggleStroke = Instance.new("UIStroke", toggleBtn)
+toggleStroke.Color = Colors.Secondary
+toggleStroke.Thickness = 3
 
 -- Improved draggable helper. Accepts a handle (what you click) and a target (what moves).
 local function makeDraggable(handle, target)
@@ -137,49 +161,62 @@ makeDraggable(toggleBtn, toggleBtn)
 ---------------------------------------------------------------------
 
 local panel = Instance.new("Frame")
-panel.Size = UDim2.fromOffset(450,350)
-panel.Position = UDim2.new(0.5,-225,1,0)
-panel.BackgroundColor3 = Color3.fromRGB(40,40,40)
+panel.Size = UDim2.fromOffset(500,400)
+panel.Position = UDim2.new(0.5,-250,1,0)
+panel.BackgroundColor3 = Colors.Dark
 panel.Parent = mainGui
 
 local panelCorner = Instance.new("UICorner", panel)
-panelCorner.CornerRadius = UDim.new(0,10)
+panelCorner.CornerRadius = UDim.new(0,15)
+
+local panelStroke = Instance.new("UIStroke", panel)
+panelStroke.Color = Colors.Primary
+panelStroke.Thickness = 2
 
 local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1,0,0,40)
-topBar.BackgroundColor3 = Color3.fromRGB(70,70,70)
+topBar.Size = UDim2.new(1,0,0,50)
+topBar.BackgroundColor3 = Colors.Primary
 topBar.Parent = panel
 
 local topBarCorner = Instance.new("UICorner", topBar)
-topBarCorner.CornerRadius = UDim.new(0,10)
+topBarCorner.CornerRadius = UDim.new(0,15)
 
-local strip = Instance.new("Frame")
-strip.Size = UDim2.new(1,0,0,6)
-strip.BackgroundColor3 = Color3.fromRGB(110,110,110)
-strip.Parent = topBar
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1,-40,1,0)
+titleLabel.Position = UDim2.new(0,10,0,0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "⚡ PRIZAK COMMANDS"
+titleLabel.TextColor3 = Colors.Text
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextScaled = true
+titleLabel.Parent = topBar
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.fromOffset(30,30)
-closeBtn.Position = UDim2.new(0,5,0,5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-closeBtn.Text = "X"
+closeBtn.Size = UDim2.fromOffset(35,35)
+closeBtn.Position = UDim2.new(1,-40,0.5,-17.5)
+closeBtn.BackgroundColor3 = Colors.Accent
+closeBtn.Text = "✕"
 closeBtn.TextScaled = true
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.TextColor3 = Colors.Text
 closeBtn.Parent = topBar
 
 local closeBtnCorner = Instance.new("UICorner", closeBtn)
-closeBtnCorner.CornerRadius = UDim.new(0,5)
+closeBtnCorner.CornerRadius = UDim.new(0,8)
+
+local closeBtnStroke = Instance.new("UIStroke", closeBtn)
+closeBtnStroke.Color = Colors.Text
+closeBtnStroke.Thickness = 2
 
 -- Drag the panel by dragging the topBar
 makeDraggable(topBar, panel)
 
 local openTween = TweenService:Create(panel, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {
-	Position = UDim2.new(0.5,-225,0.5,-175)
+	Position = UDim2.new(0.5,-250,0.5,-200)
 })
 
 local closeTween = TweenService:Create(panel, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {
-	Position = UDim2.new(0.5,-225,1,0)
+	Position = UDim2.new(0.5,-250,1,0)
 })
 
 toggleBtn.MouseButton1Click:Connect(function()
@@ -195,18 +232,22 @@ end)
 ---------------------------------------------------------------------
 
 local popup = Instance.new("TextLabel")
-popup.Size = UDim2.fromOffset(260,40)
-popup.Position = UDim2.new(0.5,-130,1,-60)
-popup.BackgroundColor3 = Color3.fromRGB(30,30,30)
-popup.TextColor3 = Color3.fromRGB(0,255,0)
+popup.Size = UDim2.fromOffset(300,50)
+popup.Position = UDim2.new(0.5,-150,1,-70)
+popup.BackgroundColor3 = Colors.DarkAlt
+popup.TextColor3 = Colors.Success
 popup.Font = Enum.Font.GothamBold
 popup.TextScaled = true
-popup.Text = "Command successfully executed"
+popup.Text = "✓ Command successfully executed"
 popup.Visible = false
 popup.Parent = mainGui
 
 local popupCorner = Instance.new("UICorner", popup)
-popupCorner.CornerRadius = UDim.new(0,10)
+popupCorner.CornerRadius = UDim.new(0,12)
+
+local popupStroke = Instance.new("UIStroke", popup)
+popupStroke.Color = Colors.Success
+popupStroke.Thickness = 2
 
 local function ShowPopup()
 	popup.Visible = true
@@ -263,90 +304,96 @@ end)
 ---------------------------------------------------------------------
 
 local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1,0,0,40)
-tabBar.Position = UDim2.new(0,0,0,40)
-tabBar.BackgroundColor3 = Color3.fromRGB(50,50,50)
+tabBar.Size = UDim2.new(1,0,0,45)
+tabBar.Position = UDim2.new(0,0,0,50)
+tabBar.BackgroundColor3 = Colors.DarkAlt
 tabBar.Parent = panel
+
+local tabCorner = Instance.new("UICorner", tabBar)
+tabCorner.CornerRadius = UDim.new(0,0)
 
 local tab1 = Instance.new("TextButton")
 tab1.Size = UDim2.new(0.25,0,1,0)
 tab1.Position = UDim2.new(0,0,0,0)
-tab1.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab1.BackgroundColor3 = Colors.Primary
 tab1.Text = "Console"
 tab1.TextScaled = true
 tab1.Font = Enum.Font.GothamBold
-tab1.TextColor3 = Color3.fromRGB(255,255,255)
+tab1.TextColor3 = Colors.Text
 tab1.Parent = tabBar
 
 local tab1Corner = Instance.new("UICorner", tab1)
-tab1Corner.CornerRadius = UDim.new(0,5)
+tab1Corner.CornerRadius = UDim.new(0,0)
 
 local tab2 = Instance.new("TextButton")
 tab2.Size = UDim2.new(0.25,0,1,0)
 tab2.Position = UDim2.new(0.25,0,0,0)
-tab2.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab2.BackgroundColor3 = Colors.DarkAlt
 tab2.Text = "Commands"
 tab2.TextScaled = true
 tab2.Font = Enum.Font.GothamBold
-tab2.TextColor3 = Color3.fromRGB(255,255,255)
+tab2.TextColor3 = Colors.Text
 tab2.Parent = tabBar
 
-local tab2Corner = Instance.new("UICorner", tab2)
-tab2Corner.CornerRadius = UDim.new(0,5)
+local tab2Stroke = Instance.new("UIStroke", tab2)
+tab2Stroke.Color = Colors.Primary
+tab2Stroke.Thickness = 1
 
 local tab3 = Instance.new("TextButton")
 tab3.Size = UDim2.new(0.25,0,1,0)
 tab3.Position = UDim2.new(0.5,0,0,0)
-tab3.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab3.BackgroundColor3 = Colors.DarkAlt
 tab3.Text = "About"
 tab3.TextScaled = true
 tab3.Font = Enum.Font.GothamBold
-tab3.TextColor3 = Color3.fromRGB(255,255,255)
+tab3.TextColor3 = Colors.Text
 tab3.Parent = tabBar
 
-local tab3Corner = Instance.new("UICorner", tab3)
-tab3Corner.CornerRadius = UDim.new(0,5)
+local tab3Stroke = Instance.new("UIStroke", tab3)
+tab3Stroke.Color = Colors.Primary
+tab3Stroke.Thickness = 1
 
 local tab4 = Instance.new("TextButton")
 tab4.Size = UDim2.new(0.25,0,1,0)
 tab4.Position = UDim2.new(0.75,0,0,0)
-tab4.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab4.BackgroundColor3 = Colors.DarkAlt
 tab4.Text = "Changelog"
 tab4.TextScaled = true
 tab4.Font = Enum.Font.GothamBold
-tab4.TextColor3 = Color3.fromRGB(255,255,255)
+tab4.TextColor3 = Colors.Text
 tab4.Parent = tabBar
 
-local tab4Corner = Instance.new("UICorner", tab4)
-tab4Corner.CornerRadius = UDim.new(0,5)
+local tab4Stroke = Instance.new("UIStroke", tab4)
+tab4Stroke.Color = Colors.Primary
+tab4Stroke.Thickness = 1
 
 ---------------------------------------------------------------------
 -- 6. TAB CONTENTS
 ---------------------------------------------------------------------
 
 local consolePage = Instance.new("Frame")
-consolePage.Size = UDim2.new(1,0,1,-80)
-consolePage.Position = UDim2.new(0,0,0,80)
+consolePage.Size = UDim2.new(1,0,1,-95)
+consolePage.Position = UDim2.new(0,0,0,95)
 consolePage.BackgroundTransparency = 1
 consolePage.Parent = panel
 
 local cmdsPage = Instance.new("Frame")
-cmdsPage.Size = UDim2.new(1,0,1,-80)
-cmdsPage.Position = UDim2.new(0,0,0,80)
+cmdsPage.Size = UDim2.new(1,0,1,-95)
+cmdsPage.Position = UDim2.new(0,0,0,95)
 cmdsPage.BackgroundTransparency = 1
 cmdsPage.Visible = false
 cmdsPage.Parent = panel
 
 local aboutPage = Instance.new("Frame")
-aboutPage.Size = UDim2.new(1,0,1,-80)
-aboutPage.Position = UDim2.new(0,0,0,80)
+aboutPage.Size = UDim2.new(1,0,1,-95)
+aboutPage.Position = UDim2.new(0,0,0,95)
 aboutPage.BackgroundTransparency = 1
 aboutPage.Visible = false
 aboutPage.Parent = panel
 
 local changelogPage = Instance.new("Frame")
-changelogPage.Size = UDim2.new(1,0,1,-80)
-changelogPage.Position = UDim2.new(0,0,0,80)
+changelogPage.Size = UDim2.new(1,0,1,-95)
+changelogPage.Position = UDim2.new(0,0,0,95)
 changelogPage.BackgroundTransparency = 1
 changelogPage.Visible = false
 changelogPage.Parent = panel
@@ -359,12 +406,28 @@ local function showPage(pageName)
 
 	if pageName == "console" then
 		consolePage.Visible = true
+		tab1.BackgroundColor3 = Colors.Primary
+		tab2.BackgroundColor3 = Colors.DarkAlt
+		tab3.BackgroundColor3 = Colors.DarkAlt
+		tab4.BackgroundColor3 = Colors.DarkAlt
 	elseif pageName == "cmds" then
 		cmdsPage.Visible = true
+		tab1.BackgroundColor3 = Colors.DarkAlt
+		tab2.BackgroundColor3 = Colors.Primary
+		tab3.BackgroundColor3 = Colors.DarkAlt
+		tab4.BackgroundColor3 = Colors.DarkAlt
 	elseif pageName == "about" then
 		aboutPage.Visible = true
+		tab1.BackgroundColor3 = Colors.DarkAlt
+		tab2.BackgroundColor3 = Colors.DarkAlt
+		tab3.BackgroundColor3 = Colors.Primary
+		tab4.BackgroundColor3 = Colors.DarkAlt
 	elseif pageName == "changelog" then
 		changelogPage.Visible = true
+		tab1.BackgroundColor3 = Colors.DarkAlt
+		tab2.BackgroundColor3 = Colors.DarkAlt
+		tab3.BackgroundColor3 = Colors.DarkAlt
+		tab4.BackgroundColor3 = Colors.Primary
 	end
 end
 
@@ -394,28 +457,37 @@ showPage("console")
 local input = Instance.new("TextBox")
 input.Size = UDim2.new(1,-20,0,40)
 input.Position = UDim2.new(0,10,0,10)
-input.BackgroundColor3 = Color3.fromRGB(55,55,55)
-input.TextColor3 = Color3.fromRGB(255,255,255)
+input.BackgroundColor3 = Colors.DarkAlt
+input.TextColor3 = Colors.Text
 input.Font = Enum.Font.Gotham
 input.TextScaled = true
 input.PlaceholderText = "Enter command..."
+input.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 input.Parent = consolePage
 
 local inputCorner = Instance.new("UICorner", input)
-inputCorner.CornerRadius = UDim.new(0,5)
+inputCorner.CornerRadius = UDim.new(0,8)
+
+local inputStroke = Instance.new("UIStroke", input)
+inputStroke.Color = Colors.Secondary
+inputStroke.Thickness = 2
 
 local runBtn = Instance.new("TextButton")
 runBtn.Size = UDim2.new(1,-20,0,40)
 runBtn.Position = UDim2.new(0,10,0,60)
-runBtn.BackgroundColor3 = Color3.fromRGB(90,90,90)
-runBtn.Text = "Run Command"
+runBtn.BackgroundColor3 = Colors.Secondary
+runBtn.Text = "▶ Run Command"
 runBtn.TextScaled = true
 runBtn.Font = Enum.Font.GothamBold
-runBtn.TextColor3 = Color3.fromRGB(255,255,255)
+runBtn.TextColor3 = Colors.Text
 runBtn.Parent = consolePage
 
 local runBtnCorner = Instance.new("UICorner", runBtn)
-runBtnCorner.CornerRadius = UDim.new(0,5)
+runBtnCorner.CornerRadius = UDim.new(0,8)
+
+local runBtnStroke = Instance.new("UIStroke", runBtn)
+runBtnStroke.Color = Colors.Secondary
+runBtnStroke.Thickness = 2
 
 runBtn.MouseButton1Click:Connect(function()
 	if input.Text ~= "" then
@@ -433,6 +505,7 @@ scroll.Size = UDim2.new(1,-20,1,-20)
 scroll.Position = UDim2.new(0,10,0,10)
 scroll.BackgroundTransparency = 1
 scroll.ScrollBarThickness = 6
+scroll.ScrollBarImageColor3 = Colors.Primary
 scroll.CanvasSize = UDim2.new(0,0,0,0)
 scroll.Parent = cmdsPage
 
@@ -442,7 +515,7 @@ cmdsList.BackgroundTransparency = 1
 cmdsList.Parent = scroll
 
 local UIList = Instance.new("UIListLayout", cmdsList)
-UIList.Padding = UDim.new(0,10)
+UIList.Padding = UDim.new(0,8)
 UIList.FillDirection = Enum.FillDirection.Vertical
 
 UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -451,44 +524,57 @@ end)
 
 local function AddCommandButton(name, cmdData)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(1,0,0,40)
-	btn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-	btn.Text = name
+	btn.Size = UDim2.new(1,0,0,45)
+	btn.BackgroundColor3 = Colors.DarkAlt
+	btn.Text = "▸ " .. name:upper()
 	btn.TextScaled = true
 	btn.Font = Enum.Font.GothamBold
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.TextColor3 = Colors.Secondary
 	btn.Parent = cmdsList
 
 	local btnCorner = Instance.new("UICorner", btn)
-	btnCorner.CornerRadius = UDim.new(0,5)
+	btnCorner.CornerRadius = UDim.new(0,8)
+
+	local btnStroke = Instance.new("UIStroke", btn)
+	btnStroke.Color = Colors.Primary
+	btnStroke.Thickness = 1.5
 
 	if cmdData.input then
 		btn.MouseButton1Click:Connect(function()
 			local prompt = Instance.new("TextBox")
 			prompt.Size = UDim2.new(1,-20,0,40)
 			prompt.Position = UDim2.new(0,10,0,50)
-			prompt.BackgroundColor3 = Color3.fromRGB(60,60,60)
-			prompt.TextColor3 = Color3.fromRGB(255,255,255)
+			prompt.BackgroundColor3 = Colors.DarkAlt
+			prompt.TextColor3 = Colors.Text
 			prompt.Font = Enum.Font.Gotham
 			prompt.TextScaled = true
 			prompt.PlaceholderText = "Enter input..."
+			prompt.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 			prompt.Parent = cmdsPage
 
 			local promptCorner = Instance.new("UICorner", prompt)
-			promptCorner.CornerRadius = UDim.new(0,5)
+			promptCorner.CornerRadius = UDim.new(0,8)
+
+			local promptStroke = Instance.new("UIStroke", prompt)
+			promptStroke.Color = Colors.Secondary
+			promptStroke.Thickness = 2
 
 			local ok = Instance.new("TextButton")
 			ok.Size = UDim2.new(1,-20,0,40)
 			ok.Position = UDim2.new(0,10,0,100)
-			ok.BackgroundColor3 = Color3.fromRGB(90,90,90)
-			ok.Text = "Run"
+			ok.BackgroundColor3 = Colors.Success
+			ok.Text = "✓ Run"
 			ok.TextScaled = true
 			ok.Font = Enum.Font.GothamBold
-			ok.TextColor3 = Color3.fromRGB(255,255,255)
+			ok.TextColor3 = Colors.Text
 			ok.Parent = cmdsPage
 
 			local okCorner = Instance.new("UICorner", ok)
-			okCorner.CornerRadius = UDim.new(0,5)
+			okCorner.CornerRadius = UDim.new(0,8)
+
+			local okStroke = Instance.new("UIStroke", ok)
+			okStroke.Color = Colors.Success
+			okStroke.Thickness = 2
 
 			ok.MouseButton1Click:Connect(function()
 				pcall(function()
@@ -529,7 +615,7 @@ RegisterCommand("cmds", function(args)
 	end
 	StarterGui:SetCore("ChatMakeSystemMessage", {
 		Text = list,
-		Color = Color3.fromRGB(0,162,255)
+		Color = Colors.Secondary
 	})
 end, "List commands", false)
 
@@ -793,11 +879,11 @@ end, "Set gravity", true)
 
 -- R6 / R15: client cannot reliably switch rig type. Provide safe message.
 RegisterCommand("r6", function()
-	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R6 avatar to use R6.", Color = Color3.fromRGB(255,200,0)})
+	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R6 avatar to use R6.", Color = Colors.Warning})
 end, "Info about R6", false)
 
 RegisterCommand("r15", function()
-	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R15 avatar to use R15.", Color = Color3.fromRGB(255,200,0)})
+	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R15 avatar to use R15.", Color = Colors.Warning})
 end, "Info about R15", false)
 
 ---------------------------------------------------------------------
@@ -813,23 +899,23 @@ end
 ---------------------------------------------------------------------
 
 local aboutLabel = Instance.new("TextLabel")
-aboutLabel.Size = UDim2.new(1,-20,0,100)
-aboutLabel.Position = UDim2.new(0,10,0,10)
+aboutLabel.Size = UDim2.new(1,-20,0,150)
+aboutLabel.Position = UDim2.new(0,10,0,20)
 aboutLabel.BackgroundTransparency = 1
-aboutLabel.TextColor3 = Color3.fromRGB(255,255,255)
-aboutLabel.Font = Enum.Font.Gotham
+aboutLabel.TextColor3 = Colors.Secondary
+aboutLabel.Font = Enum.Font.GothamBold
 aboutLabel.TextScaled = true
 aboutLabel.TextWrapped = true
-aboutLabel.Text = "LarryInvictus made this for the group Prizak, but we dont care who uses it!"
+aboutLabel.Text = "⭐ PRIZAK GUI\n\nCreated by LarryInvictus for the group Prizak.\n\nBut we don't care who uses it!\n\nEnjoy the features and have fun!"
 aboutLabel.Parent = aboutPage
 
 local changelogLabel = Instance.new("TextLabel")
-changelogLabel.Size = UDim2.new(1,-20,0,100)
-changelogLabel.Position = UDim2.new(0,10,0,10)
+changelogLabel.Size = UDim2.new(1,-20,0,200)
+changelogLabel.Position = UDim2.new(0,10,0,20)
 changelogLabel.BackgroundTransparency = 1
-changelogLabel.TextColor3 = Color3.fromRGB(255,255,255)
-changelogLabel.Font = Enum.Font.Gotham
+changelogLabel.TextColor3 = Colors.Secondary
+changelogLabel.Font = Enum.Font.GothamBold
 changelogLabel.TextScaled = true
 changelogLabel.TextWrapped = true
-changelogLabel.Text = "Added 2 new tabs and new bug fixes"
+changelogLabel.Text = "📝 CHANGELOG\n\n✓ Enhanced color scheme with purple & blue\n✓ Added vibrant UI elements & strokes\n✓ Improved tab switching with visual feedback\n✓ Better button styling & hover effects\n✓ Fixed 2 new tabs and bug fixes\n✓ Professional dark theme applied"
 changelogLabel.Parent = changelogPage
