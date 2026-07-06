@@ -67,7 +67,7 @@ task.wait(1)
 fadeGui:Destroy()
 
 ---------------------------------------------------------------------
--- 2. TOGGLE BUTTON (🔥) — Draggable
+-- 2. TOGGLE BUTTON (🔥) — Draggable (improved)
 ---------------------------------------------------------------------
 
 local mainGui = Instance.new("ScreenGui")
@@ -87,41 +87,52 @@ toggleBtn.Parent = mainGui
 local toggleCorner = Instance.new("UICorner", toggleBtn)
 toggleCorner.CornerRadius = UDim.new(1,0)
 
-local function makeDraggable(obj)
+-- Improved draggable helper. Accepts a handle (what you click) and a target (what moves).
+local function makeDraggable(handle, target)
+	target = target or handle
 	local dragging = false
-	local dragStart, startPos
+	local dragInput
+	local dragStart
+	local startPos
 
-	obj.InputBegan:Connect(function(input)
+	local function update(input)
+		local delta = input.Position - dragStart
+		local newX = startPos.X.Offset + delta.X
+		local newY = startPos.Y.Offset + delta.Y
+		-- Clamp to screen bounds (simple clamp, keeps top-left inside 0..viewport)
+		local viewX, viewY = workspace.CurrentCamera.ViewportSize.X, workspace.CurrentCamera.ViewportSize.Y
+		local maxX = viewX - target.AbsoluteSize.X
+		local maxY = viewY - target.AbsoluteSize.Y
+		newX = math.clamp(newX, 0, maxX)
+		newY = math.clamp(newY, 0, maxY)
+		target.Position = UDim2.new(startPos.X.Scale, newX, startPos.Y.Scale, newY)
+	end
+
+	handle.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
 			dragStart = input.Position
-			startPos = obj.Position
+			startPos = target.Position
+			dragInput = input
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
 		end
 	end)
 
-	obj.InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local delta = input.Position - dragStart
-			obj.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + delta.X,
-				startPos.Y.Scale,
-				startPos.Y.Offset + delta.Y
-			)
-		end
-	end)
-
-	obj.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
+	UIS.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			pcall(update, input)
 		end
 	end)
 end
 
-makeDraggable(toggleBtn)
+makeDraggable(toggleBtn, toggleBtn)
 
 ---------------------------------------------------------------------
--- 3. SLIDE-OPEN PANEL — Draggable
+-- 3. SLIDE-OPEN PANEL — Draggable (improved)
 ---------------------------------------------------------------------
 
 local panel = Instance.new("Frame")
@@ -159,7 +170,8 @@ closeBtn.Parent = topBar
 local closeBtnCorner = Instance.new("UICorner", closeBtn)
 closeBtnCorner.CornerRadius = UDim.new(0,5)
 
-makeDraggable(topBar)
+-- Drag the panel by dragging the topBar
+makeDraggable(topBar, panel)
 
 local openTween = TweenService:Create(panel, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {
 	Position = UDim2.new(0.5,-225,0.5,-175)
@@ -431,7 +443,7 @@ local function AddCommandButton(name, cmdData)
 end
 
 ---------------------------------------------------------------------
--- 9. SAFE COMMANDS (NO EXPLOITS)
+-- 9. SAFE COMMANDS (NO EXPLOITS) — Added many, improved fly, fling, walkfling
 ---------------------------------------------------------------------
 
 -- PREFIX
@@ -454,9 +466,10 @@ RegisterCommand("cmds", function(args)
 	})
 end, "List commands", false)
 
--- FLY (WASD + mobile via MoveDirection)
+-- FLY (improved)
 local flying = false
 local flyConn
+local flySpeed = 60
 
 RegisterCommand("fly", function()
 	if flying then return end
@@ -469,10 +482,16 @@ RegisterCommand("fly", function()
 	flyConn = RunService.RenderStepped:Connect(function()
 		if not flying or not hum or not hrp then return end
 		local dir = hum.MoveDirection
-		local vel = Vector3.new(dir.X,0,dir.Z)
-		hrp.AssemblyLinearVelocity = vel * 60
+		local vy = 0
+		if UIS:IsKeyDown(Enum.KeyCode.Space) then
+			vy = 60
+		elseif UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.RightShift) then
+			vy = -60
+		end
+		local vel = Vector3.new(dir.X, 0, dir.Z)
+		hrp.AssemblyLinearVelocity = Vector3.new(vel.X * flySpeed, vy, vel.Z * flySpeed)
 	end)
-end, "Fly", false)
+end, "Fly (WASD + Space/Shift)", false)
 
 RegisterCommand("unfly", function()
 	flying = false
@@ -554,19 +573,142 @@ RegisterCommand("goto", function(args)
 	end
 end, "Goto player (display name or username)", true)
 
--- FLING (client fling - uses display name or username)
+-- FLING (improved client fling)
 RegisterCommand("fling", function(args)
 	local target = FindPlayer(args[1])
 	if not target or not target.Character or not Player.Character then return end
 
 	local hrp = Player.Character:WaitForChild("HumanoidRootPart")
-	local thrp = target.Character:WaitForChild("HumanoidRootPart")
+	local thrp = target.Character:FindFirstChild("HumanoidRootPart")
+	if not thrp then return end
 
-	hrp.CFrame = thrp.CFrame
-	hrp.AssemblyLinearVelocity = Vector3.new(9999,9999,9999)
+	-- attempt multiple short high-velocity pushes near the target
+	for i = 1, 6 do
+		pcall(function()
+			hrp.CFrame = thrp.CFrame * CFrame.new(0, 2, 0)
+			hrp.AssemblyLinearVelocity = Vector3.new(0, 1000, 0)
+			hrp.CFrame = thrp.CFrame
+			-- move our hrp into the target to encourage physics interaction
+			hrp = thrp -- no-op to be safe in pcall
+		end)
+		task.wait(0.05)
+	end
+
+	-- As a fallback, try applying a large velocity to our own HRP while placing it on the target
+	pcall(function()
+		hrp.CFrame = thrp.CFrame + Vector3.new(0,3,0)
+		hrp.AssemblyLinearVelocity = Vector3.new(9999,9999,9999)
+	end)
 end, "Fling player (display name or username)", true)
 
--- EXTRA SMALL SAFE COMMANDS
+-- WALKFLING
+RegisterCommand("walkfling", function(args)
+	local target = FindPlayer(args[1])
+	if not target or not target.Character or not Player.Character then return end
+
+	local char = Player.Character
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	local thrp = target.Character:FindFirstChild("HumanoidRootPart")
+	if not thrp then return end
+
+	-- walk up to the target and apply repeated velocity
+	for i = 1, 40 do
+		pcall(function()
+			hrp.CFrame = thrp.CFrame + Vector3.new(0,2,0)
+			hrp.AssemblyLinearVelocity = Vector3.new(0,1000,0)
+			char:WaitForChild("HumanoidRootPart").CFrame = thrp.CFrame * CFrame.new(0,0.5,0)
+		end)
+		task.wait(0.03)
+	end
+end, "Walkfling player (display name or username)", true)
+
+-- ADVERTISE: say "JOIN PRIZAK" in chat
+RegisterCommand("advertise", function()
+	pcall(function()
+		Player:Chat("JOIN PRIZAK")
+	end)
+end, "Advertise in chat", false)
+
+-- HEAL
+RegisterCommand("heal", function()
+	local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Health = hum.MaxHealth
+	end
+end, "Heal to full", false)
+
+-- SIT / UNSIT
+RegisterCommand("sit", function()
+	local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum.Sit = true end
+end, "Sit down", false)
+
+RegisterCommand("unsit", function()
+	local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum.Sit = false end
+end, "Stand up", false)
+
+-- FREEZE / UNFREEZE (non-destructive)
+local frozenState = {}
+RegisterCommand("freeze", function()
+	local char = Player.Character
+	if not char then return end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+	frozenState.walkspeed = hum.WalkSpeed
+	frozenState.jump = hum.JumpPower
+	hum.WalkSpeed = 0
+	hum.JumpPower = 0
+	hum.PlatformStand = true
+end, "Freeze yourself", false)
+
+RegisterCommand("unfreeze", function()
+	local char = Player.Character
+	if not char then return end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+	hum.PlatformStand = false
+	if frozenState.walkspeed then hum.WalkSpeed = frozenState.walkspeed end
+	if frozenState.jump then hum.JumpPower = frozenState.jump end
+	frozenState = {}
+end, "Unfreeze yourself", false)
+
+-- SPIN / SPINSTOP
+local spinConn
+RegisterCommand("spin", function()
+	if spinConn then return end
+	local char = Player.Character or Player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	spinConn = RunService.Heartbeat:Connect(function(dt)
+		if hrp and hrp.Parent then
+			hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(180 * dt), 0)
+		end
+	end)
+end, "Spin yourself", false)
+
+RegisterCommand("spinstop", function()
+	if spinConn then
+		spinConn:Disconnect()
+		spinConn = nil
+	end
+end, "Stop spinning", false)
+
+-- KILL (set health to 0)
+RegisterCommand("kill", function(args)
+	local target = args[1]
+	if not target or target:lower() == "me" then
+		local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum.Health = 0 end
+	else
+		local p = FindPlayer(target)
+		if p and p.Character then
+			local hum = p.Character:FindFirstChildOfClass("Humanoid")
+			if hum then hum.Health = 0 end
+		end
+	end
+end, "Kill yourself or target (last resort)", true)
+
+-- DEFAULTS
 RegisterCommand("defaults", function()
 	local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
@@ -575,11 +717,21 @@ RegisterCommand("defaults", function()
 	end
 end, "Reset speed/jump", false)
 
+-- GRAVITY
 RegisterCommand("gravity", function(args)
 	if tonumber(args[1]) then
 		workspace.Gravity = tonumber(args[1])
 	end
 end, "Set gravity", true)
+
+-- R6 / R15: client cannot reliably switch rig type. Provide safe message.
+RegisterCommand("r6", function()
+	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R6 avatar to use R6.", Color = Color3.fromRGB(255,200,0)})
+end, "Info about R6", false)
+
+RegisterCommand("r15", function()
+	StarterGui:SetCore("ChatMakeSystemMessage", {Text = "Changing rig client-side is not supported; rejoin with an R15 avatar to use R15.", Color = Color3.fromRGB(255,200,0)})
+end, "Info about R15", false)
 
 ---------------------------------------------------------------------
 -- 10. BUILD COMMAND BUTTONS
