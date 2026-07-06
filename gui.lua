@@ -59,6 +59,7 @@ fadeText.Font = Enum.Font.GothamBold
 fadeText.TextScaled = true
 fadeText.Parent = fadeGui
 
+fadeText.TextTransparency = 1
 TweenService:Create(fadeText, TweenInfo.new(1), {TextTransparency = 0}):Play()
 task.wait(1)
 TweenService:Create(fadeFrame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
@@ -268,7 +269,7 @@ tabBar.BackgroundColor3 = Color3.fromRGB(50,50,50)
 tabBar.Parent = panel
 
 local tab1 = Instance.new("TextButton")
-tab1.Size = UDim2.new(0.5,0,1,0)
+tab1.Size = UDim2.new(0.25,0,1,0)
 tab1.Position = UDim2.new(0,0,0,0)
 tab1.BackgroundColor3 = Color3.fromRGB(70,70,70)
 tab1.Text = "Console"
@@ -281,8 +282,8 @@ local tab1Corner = Instance.new("UICorner", tab1)
 tab1Corner.CornerRadius = UDim.new(0,5)
 
 local tab2 = Instance.new("TextButton")
-tab2.Size = UDim2.new(0.5,0,1,0)
-tab2.Position = UDim2.new(0.5,0,0,0)
+tab2.Size = UDim2.new(0.25,0,1,0)
+tab2.Position = UDim2.new(0.25,0,0,0)
 tab2.BackgroundColor3 = Color3.fromRGB(70,70,70)
 tab2.Text = "Commands"
 tab2.TextScaled = true
@@ -292,6 +293,32 @@ tab2.Parent = tabBar
 
 local tab2Corner = Instance.new("UICorner", tab2)
 tab2Corner.CornerRadius = UDim.new(0,5)
+
+local tab3 = Instance.new("TextButton")
+tab3.Size = UDim2.new(0.25,0,1,0)
+tab3.Position = UDim2.new(0.5,0,0,0)
+tab3.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab3.Text = "About"
+tab3.TextScaled = true
+tab3.Font = Enum.Font.GothamBold
+tab3.TextColor3 = Color3.fromRGB(255,255,255)
+tab3.Parent = tabBar
+
+local tab3Corner = Instance.new("UICorner", tab3)
+tab3Corner.CornerRadius = UDim.new(0,5)
+
+local tab4 = Instance.new("TextButton")
+tab4.Size = UDim2.new(0.25,0,1,0)
+tab4.Position = UDim2.new(0.75,0,0,0)
+tab4.BackgroundColor3 = Color3.fromRGB(70,70,70)
+tab4.Text = "Changelog"
+tab4.TextScaled = true
+tab4.Font = Enum.Font.GothamBold
+tab4.TextColor3 = Color3.fromRGB(255,255,255)
+tab4.Parent = tabBar
+
+local tab4Corner = Instance.new("UICorner", tab4)
+tab4Corner.CornerRadius = UDim.new(0,5)
 
 ---------------------------------------------------------------------
 -- 6. TAB CONTENTS
@@ -310,15 +337,55 @@ cmdsPage.BackgroundTransparency = 1
 cmdsPage.Visible = false
 cmdsPage.Parent = panel
 
-tab1.MouseButton1Click:Connect(function()
-	consolePage.Visible = true
+local aboutPage = Instance.new("Frame")
+aboutPage.Size = UDim2.new(1,0,1,-80)
+aboutPage.Position = UDim2.new(0,0,0,80)
+aboutPage.BackgroundTransparency = 1
+aboutPage.Visible = false
+aboutPage.Parent = panel
+
+local changelogPage = Instance.new("Frame")
+changelogPage.Size = UDim2.new(1,0,1,-80)
+changelogPage.Position = UDim2.new(0,0,0,80)
+changelogPage.BackgroundTransparency = 1
+changelogPage.Visible = false
+changelogPage.Parent = panel
+
+local function showPage(pageName)
+	consolePage.Visible = false
 	cmdsPage.Visible = false
+	aboutPage.Visible = false
+	changelogPage.Visible = false
+
+	if pageName == "console" then
+		consolePage.Visible = true
+	elseif pageName == "cmds" then
+		cmdsPage.Visible = true
+	elseif pageName == "about" then
+		aboutPage.Visible = true
+	elseif pageName == "changelog" then
+		changelogPage.Visible = true
+	end
+end
+
+tab1.MouseButton1Click:Connect(function()
+	showPage("console")
 end)
 
 tab2.MouseButton1Click:Connect(function()
-	consolePage.Visible = false
-	cmdsPage.Visible = true
+	showPage("cmds")
 end)
+
+tab3.MouseButton1Click:Connect(function()
+	showPage("about")
+end)
+
+tab4.MouseButton1Click:Connect(function()
+	showPage("changelog")
+end)
+
+-- default page
+showPage("console")
 
 ---------------------------------------------------------------------
 -- 7. CONSOLE PAGE UI
@@ -740,3 +807,29 @@ end, "Info about R15", false)
 for name, data in pairs(Commands) do
 	AddCommandButton(name, data)
 end
+
+---------------------------------------------------------------------
+-- 11. ABOUT & CHANGELOG PAGES CONTENT
+---------------------------------------------------------------------
+
+local aboutLabel = Instance.new("TextLabel")
+aboutLabel.Size = UDim2.new(1,-20,0,100)
+aboutLabel.Position = UDim2.new(0,10,0,10)
+aboutLabel.BackgroundTransparency = 1
+aboutLabel.TextColor3 = Color3.fromRGB(255,255,255)
+aboutLabel.Font = Enum.Font.Gotham
+aboutLabel.TextScaled = true
+aboutLabel.TextWrapped = true
+aboutLabel.Text = "LarryInvictus made this for the group Prizak, but we dont care who uses it!"
+aboutLabel.Parent = aboutPage
+
+local changelogLabel = Instance.new("TextLabel")
+changelogLabel.Size = UDim2.new(1,-20,0,100)
+changelogLabel.Position = UDim2.new(0,10,0,10)
+changelogLabel.BackgroundTransparency = 1
+changelogLabel.TextColor3 = Color3.fromRGB(255,255,255)
+changelogLabel.Font = Enum.Font.Gotham
+changelogLabel.TextScaled = true
+changelogLabel.TextWrapped = true
+changelogLabel.Text = "Added 2 new tabs and new bug fixes"
+changelogLabel.Parent = changelogPage
